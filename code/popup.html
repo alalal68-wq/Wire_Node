@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Wire Node</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 312px;
+      background: radial-gradient(120% 100% at 0 0, #15152a 0%, #0a0a14 60%);
+      color: #e8e8f0;
+      font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+      padding: 16px;
+    }
+    .header { display: flex; align-items: center; gap: 11px; margin-bottom: 16px; padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255,255,255,.08); }
+    .logo { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      background: url('eye.png') center/66% no-repeat, #08080e;
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 4px 16px rgba(0,0,0,.5); }
+    .title { font-size: 13px; font-weight: 800; color: #fff; }
+
+    /* CRT / Serial Experiments Lain эффект */
+    body::after { content:''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,.14) 0, rgba(0,0,0,.14) 1px, transparent 1px, transparent 3px);
+      animation: pFlick 2.6s steps(40) infinite; }
+    body::before { content:''; position: fixed; left: 0; right: 0; top: 0; height: 34%; pointer-events: none; z-index: 9998;
+      background: linear-gradient(180deg, transparent, rgba(150,195,255,.07), transparent);
+      animation: pSweep 5.5s linear infinite; }
+    @keyframes pFlick { 0%{opacity:.92}8%{opacity:1}11%{opacity:.84}14%{opacity:1}48%{opacity:.9}52%{opacity:1}70%{opacity:.87}73%{opacity:1}100%{opacity:.95} }
+    @keyframes pSweep { 0%{transform:translateY(-120%)} 100%{transform:translateY(330%)} }
+    .ver { font-size: 9px; color: rgba(138,150,255,.9); margin-top: 2px; text-transform: uppercase; letter-spacing: 1.4px; }
+
+    label { display: block; font-size: 9px; color: rgba(255,255,255,.4); text-transform: uppercase;
+      letter-spacing: 1px; margin: 13px 0 5px; }
+    input, textarea, select {
+      width: 100%; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09);
+      border-radius: 9px; color: #e8e8f0; font-family: inherit; font-size: 12px; padding: 9px 11px;
+      outline: none; transition: border-color .2s; }
+    input:focus, textarea:focus, select:focus { border-color: rgba(88,101,242,.6); }
+    select { cursor: pointer; }
+    select option { background: #15152a; }
+    textarea { resize: none; height: 58px; line-height: 1.5; }
+
+    .key-wrap { position: relative; }
+    .key-wrap input { padding-right: 38px; }
+    .eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 26px; height: 26px;
+      border: none; background: transparent; color: rgba(255,255,255,.45); cursor: pointer; font-size: 14px;
+      border-radius: 6px; }
+    .eye:hover { color: #fff; background: rgba(255,255,255,.08); }
+
+    .hint { font-size: 9px; color: rgba(255,255,255,.32); margin-top: 4px; line-height: 1.4; }
+
+    .row { display: flex; align-items: center; justify-content: space-between; margin-top: 13px; }
+    .row-lbl { font-size: 11px; color: rgba(255,255,255,.6); }
+    .toggle { position: relative; width: 38px; height: 21px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .sl { position: absolute; inset: 0; background: rgba(255,255,255,.12); border-radius: 21px; cursor: pointer; transition: .25s; }
+    .sl:before { content: ''; position: absolute; width: 15px; height: 15px; left: 3px; top: 3px;
+      background: rgba(255,255,255,.5); border-radius: 50%; transition: .25s; }
+    input:checked + .sl { background: #5865F2; }
+    input:checked + .sl:before { transform: translateX(17px); background: #fff; }
+
+    .divider { height: 1px; background: rgba(255,255,255,.07); margin: 16px 0 2px; }
+
+    .save-btn { width: 100%; background: linear-gradient(135deg, #5865F2, #6f5cf2); color: #fff; border: none;
+      border-radius: 10px; padding: 11px; font-size: 11.5px; font-weight: 800; cursor: pointer; margin-top: 16px;
+      transition: filter .2s; letter-spacing: .4px; }
+    .save-btn:hover { filter: brightness(1.08); }
+    .test-btn { width: 100%; background: rgba(87,242,135,.12); color: #57F287; border: 1px solid rgba(87,242,135,.25);
+      border-radius: 10px; padding: 9px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 8px; transition: .2s; }
+    .test-btn:hover { background: rgba(87,242,135,.22); }
+    .status { text-align: center; font-size: 10.5px; margin-top: 9px; min-height: 14px; }
+    .ok { color: #57F287; } .err { color: #ED4245; }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div class="logo"></div>
+    <div>
+      <div class="title">Wire Node V.0.1</div>
+    </div>
+  </div>
+
+  <label>Провайдер</label>
+  <select id="provider">
+    <option value="deepseek">DeepSeek</option>
+    <option value="groq">Groq</option>
+    <option value="openai">OpenAI</option>
+    <option value="openrouter">OpenRouter</option>
+    <option value="custom">Свой (custom)</option>
+  </select>
+
+  <label>API-ключ</label>
+  <div class="key-wrap">
+    <input type="password" id="apiKey" placeholder="sk-... / gsk_...">
+    <button class="eye" id="eye" type="button" title="Показать/скрыть">👁</button>
+  </div>
+
+  <label>API URL</label>
+  <input type="text" id="apiUrl" placeholder="https://api.deepseek.com/chat/completions">
+
+  <label>Модель <span style="text-transform:none;color:rgba(255,255,255,.3)">(пусто = авто)</span></label>
+  <input type="text" id="model" placeholder="deepseek-chat">
+
+  <label>Мой ник в Discord <span style="text-transform:none;color:rgba(255,255,255,.3)">(необязательно — определяется автоматически)</span></label>
+  <input type="text" id="ownName" placeholder="Точь-в-точь как отображается в чате">
+
+  <label>Промпт (как отвечать)</label>
+  <textarea id="systemPrompt">Ты — это я. Отвечай от моего лица в личке Discord: дружелюбно, кратко, естественно, на русском.</textarea>
+
+  <div class="divider"></div>
+
+  <div class="row">
+    <span class="row-lbl">Расширение активно</span>
+    <label class="toggle"><input type="checkbox" id="enabled" checked><span class="sl"></span></label>
+  </div>
+  <div class="row">
+    <span class="row-lbl">⏸ Тихий режим (не открывать окно)</span>
+    <label class="toggle"><input type="checkbox" id="paused"><span class="sl"></span></label>
+  </div>
+
+  <button class="save-btn" id="saveBtn">Сохранить</button>
+  <button class="test-btn" id="testBtn">🧪 Тест — показать окно чата</button>
+  <div class="status" id="status"></div>
+
+  <script src="compat.js"></script>
+  <script src="popup.js"></script>
+</body>
+
+</html>
