@@ -33,7 +33,7 @@
 
 <div align="center">
 
-<img src="assets/demo-compact.gif" alt="Wire Node в действии" width="480" />
+<img src="demo/demo-compact.gif" alt="Wire Node в действии" width="480" />
 
 *Плавающее окно появляется автоматически при входящем сообщении*
 
